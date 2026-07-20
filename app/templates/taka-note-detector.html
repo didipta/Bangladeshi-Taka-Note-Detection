@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>টাকা Detector — Bangladeshi Currency Recognition</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --paper: #faf5e9;
+        --paper-deep: #f2ead9;
+        --ink: #1c2b22;
+        --ink-soft: #4a5a4f;
+        --green: #0f5132;
+        --green-deep: #0a3b24;
+        --red: #c0293a;
+        --gold: #b8862f;
+        --gold-soft: #e4c584;
+        --line: rgba(28, 43, 34, 0.14);
+        --shadow: 0 18px 40px -18px rgba(15, 60, 40, 0.35);
+
+        --font-display: "Fraunces", serif;
+        --font-body: "Inter", sans-serif;
+        --font-bn: "Noto Sans Bengali", sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--paper);
+        background-image: radial-gradient(
+            circle at 15% 10%,
+            rgba(15, 81, 50, 0.05),
+            transparent 45%
+          ),
+          radial-gradient(circle at 85% 90%, rgba(192, 41, 58, 0.05), transparent 45%);
+        color: var(--ink);
+        font-family: var(--font-body);
+        min-height: 100vh;
+        padding: 48px 24px 80px;
+      }
+
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+
+      /* ---------- Header ---------- */
+
+      header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        border-bottom: 2px solid var(--ink);
+        padding-bottom: 22px;
+        margin-bottom: 44px;
+        flex-wrap: wrap;
+      }
+
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--green);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 22px;
+        height: 2px;
+        background: var(--red);
+        display: inline-block;
+      }
+
+      h1 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 40px;
+        line-height: 1.05;
+        letter-spacing: -0.01em;
+      }
+
+      h1 .bn {
+        font-family: var(--font-bn);
+        color: var(--green);
+      }
+
+      .tagline {
+        font-size: 14.5px;
+        color: var(--ink-soft);
+        max-width: 320px;
+        text-align: right;
+        line-height: 1.5;
+      }
+
+      /* ---------- Layout ---------- */
+
+      .grid {
+        display: grid;
+        grid-template-columns: 0.85fr 1.15fr;
+        gap: 28px;
+        align-items: start;
+      }
+
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .tagline {
+          text-align: left;
+        }
+      }
+
+      .card {
+        background: #fffdf8;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+      }
+
+      /* ---------- Upload slot ---------- */
+
+      .slot {
+        padding: 30px;
+      }
+
+      .slot-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 16px;
+      }
+
+      .dropzone {
+        border: 2px dashed var(--gold-soft);
+        border-radius: 10px;
+        padding: 28px 18px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+        background: repeating-linear-gradient(
+          135deg,
+          rgba(184, 134, 47, 0.04) 0 10px,
+          transparent 10px 20px
+        );
+      }
+
+      .dropzone:hover,
+      .dropzone.drag {
+        border-color: var(--green);
+        background: rgba(15, 81, 50, 0.05);
+      }
+
+      .dropzone svg {
+        width: 34px;
+        height: 34px;
+        color: var(--green);
+        margin-bottom: 10px;
+      }
+
+      .dropzone .primary {
+        font-weight: 600;
+        font-size: 14.5px;
+      }
+
+      .dropzone .secondary {
+        font-size: 12.5px;
+        color: var(--ink-soft);
+        margin-top: 4px;
+      }
+
+      #imageInput {
+        display: none;
+      }
+
+      .preview-thumb {
+        margin-top: 16px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        display: none;
+      }
+
+      .preview-thumb img {
+        width: 100%;
+        display: block;
+      }
+
+      .preview-thumb.show {
+        display: block;
+      }
+
+      button.detect {
+        width: 100%;
+        margin-top: 18px;
+        background: var(--green);
+        color: #fdf9ef;
+        border: none;
+        padding: 14px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14.5px;
+        letter-spacing: 0.01em;
+        transition: background 0.2s ease, transform 0.1s ease;
+      }
+
+      button.detect:hover {
+        background: var(--green-deep);
+      }
+
+      button.detect:active {
+        transform: scale(0.99);
+      }
+
+      button.detect:disabled {
+        background: #b9c3ba;
+        cursor: not-allowed;
+      }
+
+      .error-msg {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--red);
+        display: none;
+      }
+
+      .error-msg.show {
+        display: block;
+      }
+
+      /* ---------- Result: the note ---------- */
+
+      .result-wrap {
+        padding: 26px;
+        display: none;
+      }
+
+      .result-wrap.show {
+        display: block;
+      }
+
+      .empty-state {
+        padding: 60px 30px;
+        text-align: center;
+        color: var(--ink-soft);
+      }
+
+      .empty-state.hide {
+        display: none;
+      }
+
+      .empty-state svg {
+        width: 40px;
+        height: 40px;
+        color: var(--gold-soft);
+        margin-bottom: 14px;
+      }
+
+      .empty-state .msg {
+        font-size: 14px;
+        max-width: 260px;
+        margin: 0 auto;
+        line-height: 1.5;
+      }
+
+      .note {
+        position: relative;
+        border-radius: 12px;
+        padding: 26px 24px;
+        color: #fdf9ef;
+        overflow: hidden;
+        background: linear-gradient(155deg, var(--note-a, #0f5132), var(--note-b, #0a3b24));
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      }
+
+      .note::before {
+        /* guilloché-style engraving texture */
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.16;
+        background-image: repeating-radial-gradient(
+            circle at 100% 0%,
+            transparent 0,
+            transparent 6px,
+            rgba(255, 255, 255, 0.5) 7px
+          ),
+          repeating-radial-gradient(
+            circle at 0% 100%,
+            transparent 0,
+            transparent 6px,
+            rgba(255, 255, 255, 0.4) 7px
+          );
+        pointer-events: none;
+      }
+
+      .note::after {
+        /* security thread */
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 68%;
+        width: 6px;
+        background: repeating-linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.55) 0 6px,
+          transparent 6px 12px
+        );
+        opacity: 0.55;
+      }
+
+      .note-top {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .note-bn {
+        font-family: var(--font-bn);
+        font-size: 15px;
+        letter-spacing: 0.02em;
+        opacity: 0.9;
+      }
+
+      .side-badge {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        border-radius: 999px;
+        padding: 4px 12px;
+      }
+
+      .note-value {
+        position: relative;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 74px;
+        line-height: 1;
+        margin: 18px 0 4px;
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .note-value .currency {
+        font-size: 34px;
+        opacity: 0.85;
+      }
+
+      .note-sub {
+        position: relative;
+        font-size: 13px;
+        opacity: 0.85;
+      }
+
+      .note-meta {
+        position: relative;
+        display: flex;
+        gap: 28px;
+        margin-top: 22px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.28);
+      }
+
+      .note-meta div {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .note-meta .k {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+
+      .note-meta .v {
+        font-family: var(--font-mono);
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      /* ---------- Detections table ---------- */
+
+      .detections {
+        margin-top: 22px;
+      }
+
+      .detections .heading {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 10px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
+      }
+
+      th {
+        text-align: left;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        font-weight: 500;
+        padding: 8px 6px;
+        border-bottom: 1px solid var(--ink);
+      }
+
+      td {
+        padding: 10px 6px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .denom-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      .denom-chip .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .conf-bar-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .conf-bar {
+        flex: 1;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--paper-deep);
+        overflow: hidden;
+      }
+
+      .conf-bar span {
+        display: block;
+        height: 100%;
+        background: var(--green);
+        border-radius: 999px;
+      }
+
+      .conf-num {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        min-width: 44px;
+        text-align: right;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 50px;
+        font-size: 12px;
+        color: var(--ink-soft);
+        font-family: var(--font-mono);
+        letter-spacing: 0.04em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <div class="eyebrow">Currency Recognition</div>
+          <h1><span class="bn">টাকা</span> Note Detector</h1>
+        </div>
+        <p class="tagline">
+          Upload a photo of a Bangladeshi banknote to identify its denomination and side.
+        </p>
+      </header>
+
+      <div class="grid">
+        <!-- Upload -->
+        <div class="card slot">
+          <div class="slot-label">01 — Upload Note</div>
+
+          <div class="dropzone" id="dropzone">
+            <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 8.25L12 3.75m0 0L7.5 8.25M12 3.75v13.5"
+              />
+            </svg>
+            <div class="primary">Click to choose an image</div>
+            <div class="secondary">or drag and drop a JPG / PNG here</div>
+          </div>
+
+          <input type="file" id="imageInput" accept="image/*" />
+
+          <div class="preview-thumb" id="previewThumb">
+            <img id="previewImage" alt="Uploaded note preview" />
+          </div>
+
+          <button class="detect" id="detectBtn" onclick="detectNote()">
+            Detect Note
+          </button>
+
+          <div class="error-msg" id="errorMsg"></div>
+        </div>
+
+        <!-- Result -->
+        <div class="card">
+          <div class="empty-state" id="emptyState">
+            <svg fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M2.25 12a9.75 9.75 0 1119.5 0 9.75 9.75 0 01-19.5 0zM8.25 12h7.5M8.25 9h4.5M8.25 15h4.5"
+              />
+            </svg>
+            <div class="msg">Results will appear here once a note has been detected.</div>
+          </div>
+
+          <div class="result-wrap" id="resultContainer">
+            <div class="note" id="noteCard">
+              <div class="note-top">
+                <div class="note-bn">গণপ্রজাতন্ত্রী বাংলাদেশ ব্যাংক</div>
+                <div class="side-badge" id="sideBadge">FRONT</div>
+              </div>
+
+              <div class="note-value">
+                <span class="currency">৳</span>
+                <span id="denomText">—</span>
+              </div>
+
+              <div class="note-sub" id="noteSub">Bangladesh Bank</div>
+
+              <div class="note-meta">
+                <div>
+                  <span class="k">Confidence</span>
+                  <span class="v" id="confidence">—</span>
+                </div>
+                <div>
+                  <span class="k">Inference</span>
+                  <span class="v" id="time">—</span>
+                </div>
+                <div>
+                  <span class="k">Detections</span>
+                  <span class="v" id="count">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detections">
+              <div class="heading">All Detections</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Class</th>
+                    <th>Side</th>
+                    <th style="text-align: right">Confidence</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>SCANNING · GPRB · টাকা</footer>
+    </div>
+
+    <script>
+      const API_URL = "http://127.0.0.1:8000/predict";
+
+      // Approximate real note palette per denomination (front/back gradient anchors)
+      const DENOM_COLORS = {
+        1000: ["#5b3a86", "#3a2359"],
+        500: ["#4b5b2e", "#2f3b1c"],
+        200: ["#b8862f", "#7a5a1c"],
+        100: ["#2f7a4f", "#184a30"],
+        50: ["#7a6a3a", "#4f4324"],
+        20: ["#a45a2a", "#6e3a18"],
+        10: ["#0f5132", "#0a3b24"],
+        5: ["#3a6b4a", "#234030"],
+        2: ["#5a6b7a", "#38434c"],
+      };
+      const DEFAULT_COLORS = ["#0f5132", "#0a3b24"];
+
+      // Parses class names like "200f" / "200b" / "1000f" into { denom, side }
+      function parseClassName(rawName) {
+        const match = /^(\d+)\s*([fb])$/i.exec(String(rawName).trim());
+        if (!match) {
+          return { denom: rawName, side: null, label: rawName };
+        }
+        const denom = match[1];
+        const side = match[2].toLowerCase() === "f" ? "Front" : "Back";
+        return { denom, side, label: `৳${denom} · ${side}` };
+      }
+
+      function setupDropzone() {
+        const dropzone = document.getElementById("dropzone");
+        const input = document.getElementById("imageInput");
+
+        dropzone.addEventListener("click", () => input.click());
+
+        ["dragenter", "dragover"].forEach((evt) =>
+          dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropzone.classList.add("drag");
+          })
+        );
+
+        ["dragleave", "drop"].forEach((evt) =>
+          dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("drag");
+          })
+        );
+
+        dropzone.addEventListener("drop", (e) => {
+          const files = e.dataTransfer.files;
+          if (files.length) {
+            input.files = files;
+            showPreview(files[0]);
+          }
+        });
+
+        input.addEventListener("change", () => {
+          if (input.files.length) showPreview(input.files[0]);
+        });
+      }
+
+      function showPreview(file) {
+        const thumb = document.getElementById("previewThumb");
+        const img = document.getElementById("previewImage");
+        img.src = URL.createObjectURL(file);
+        thumb.classList.add("show");
+      }
+
+      function showError(message) {
+        const el = document.getElementById("errorMsg");
+        el.textContent = message;
+        el.classList.add("show");
+      }
+
+      function clearError() {
+        const el = document.getElementById("errorMsg");
+        el.textContent = "";
+        el.classList.remove("show");
+      }
+
+      async function detectNote() {
+        clearError();
+
+        const fileInput = document.getElementById("imageInput");
+        if (!fileInput.files.length) {
+          showError("Please choose an image first.");
+          return;
+        }
+
+        const btn = document.getElementById("detectBtn");
+        btn.disabled = true;
+        btn.textContent = "Detecting…";
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (!data.success || !data.detections || !data.detections.length) {
+            showError("No note detected in this image. Try another photo.");
+            return;
+          }
+
+          renderResult(data);
+        } catch (error) {
+          console.error(error);
+          showError("Could not reach the detection API. Is it running?");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Detect Note";
+        }
+      }
+
+      function renderResult(data) {
+        document.getElementById("emptyState").classList.add("hide");
+        document.getElementById("resultContainer").classList.add("show");
+
+        const first = data.detections[0];
+        const parsed = parseClassName(first.class_name);
+        const colors = DENOM_COLORS[parsed.denom] || DEFAULT_COLORS;
+
+        const noteCard = document.getElementById("noteCard");
+        noteCard.style.setProperty("--note-a", colors[0]);
+        noteCard.style.setProperty("--note-b", colors[1]);
+
+        document.getElementById("denomText").textContent = parsed.denom;
+        document.getElementById("noteSub").textContent = parsed.side
+          ? `${parsed.side} side · Bangladesh Bank`
+          : "Bangladesh Bank";
+        document.getElementById("sideBadge").textContent = parsed.side
+          ? parsed.side.toUpperCase()
+          : "—";
+
+        document.getElementById("confidence").textContent =
+          (first.confidence * 100).toFixed(1) + "%";
+        document.getElementById("time").textContent =
+          data.inference_time_ms.toFixed(0) + " ms";
+        document.getElementById("count").textContent = data.num_detections;
+
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+
+        data.detections.forEach((item) => {
+          const p = parseClassName(item.class_name);
+          const c = DENOM_COLORS[p.denom] || DEFAULT_COLORS;
+          const pct = (item.confidence * 100).toFixed(1);
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>
+              <span class="denom-chip">
+                <span class="dot" style="background:${c[0]}"></span>
+                ৳${p.denom}
+              </span>
+            </td>
+            <td>${p.side || "—"}</td>
+            <td>
+              <div class="conf-bar-wrap">
+                <div class="conf-bar"><span style="width:${pct}%"></span></div>
+                <span class="conf-num">${pct}%</span>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      setupDropzone();
+    </script>
+  </body>
+</html>
