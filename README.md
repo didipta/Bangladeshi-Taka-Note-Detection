@@ -290,11 +290,11 @@ This application is deployed on **Render**.
 
 ### Live API
 
-https://bangladeshi-taka-note-detection-lkfo.onrender.com
+https://bangladeshi-taka-note-detection-lkfo.onrender.com/
 
 ### Swagger UI
 
-https://bangladeshi-taka-note-detection-lkfo.onrender.com/docs
+https://bangladeshi-taka-note-detection-lkfo.onrender.com/docs#
 
 ---
 
