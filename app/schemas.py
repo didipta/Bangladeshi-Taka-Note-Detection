@@ -2,6 +2,11 @@ from typing import List
 from pydantic import BaseModel
 
 
+class ImageSize(BaseModel):
+    width: int
+    height: int
+
+
 class BoundingBox(BaseModel):
     x1: float
     y1: float
@@ -18,7 +23,7 @@ class Detection(BaseModel):
 class PredictionResponse(BaseModel):
     success: bool
     filename: str
-    image_size: dict
+    image_size: ImageSize
     num_detections: int
     inference_time_ms: float
     detections: List[Detection]

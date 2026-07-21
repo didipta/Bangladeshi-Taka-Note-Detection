@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  bangladeshi-taka-note-detection:
+    build: .
+    container_name: bangladeshi-taka-note-detection
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      MODEL_PATH: /app/app/models/best.pt
+      CONFIDENCE_THRESHOLD: 0.25
+
+    restart: unless-stopped

@@ -9,6 +9,8 @@ from app.predict import load_model, run_inference
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
+from app.schemas import HealthResponse, PredictionResponse
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("taka-detector")
 
@@ -59,7 +61,7 @@ async def home(request: Request):
 # Health Check
 # ==========================================================
 
-@app.get("/health")
+@app.get("/health",response_model=HealthResponse)
 def health():
 
     try:
@@ -82,7 +84,8 @@ def health():
 # Prediction
 # ==========================================================
 
-@app.post("/predict")
+@app.post("/predict",response_model=PredictionResponse,
+    status_code=status.HTTP_200_OK,)
 async def predict(file: UploadFile = File(...)):
 
     if file.filename == "":
@@ -115,16 +118,13 @@ async def predict(file: UploadFile = File(...)):
                 detail=result["error"]
             )
 
-        return JSONResponse(
-            status_code=200,
-            content={
-                "success": True,
-                "filename": file.filename,
-                "image_size": result["image_size"],
-                "num_detections": result["num_detections"],
-                "inference_time_ms": result["inference_time_ms"],
-                "detections": result["detections"],
-            },
+        return  PredictionResponse(
+            success=True,
+            filename=file.filename,
+            image_size=result["image_size"],
+            num_detections=result["num_detections"],
+            inference_time_ms=result["inference_time_ms"],
+            detections=result["detections"],
         )
 
     except HTTPException:
