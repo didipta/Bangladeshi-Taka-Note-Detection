@@ -89,7 +89,7 @@ Bangladeshi-Taka-Note-Detection/
 ## Clone Repository
 
 ```bash
-git clone [https://github.com/didipta/Bangladeshi-Taka-Note-Detection.git](https://github.com/didipta/Bangladeshi-Taka-Note-Detection.git)
+git clone https://github.com/didipta/Bangladeshi-Taka-Note-Detection.git
 
 cd Bangladeshi-Taka-Note-Detection
 ```
