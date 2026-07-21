@@ -18,7 +18,7 @@ This project was developed as part of the **Deployment of Bangladeshi Taka Note 
 
 # 🚀 Live Demo
 
-### Public API
+### Public URL
 
 https://bangladeshi-taka-note-detection-lkfo.onrender.com
 
@@ -45,17 +45,17 @@ https://bangladeshi-taka-note-detection-lkfo.onrender.com/docs
 
 # 🛠 Technology Stack
 
-| Technology | Description |
-|------------|-------------|
-| Python 3.11 | Programming Language |
-| YOLOv11 | Object Detection Model |
-| FastAPI | REST API Framework |
-| Uvicorn | ASGI Server |
-| OpenCV | Image Processing |
-| Pillow | Image Handling |
-| NumPy | Numerical Computing |
-| Docker | Containerization |
-| Render | Cloud Deployment |
+| Technology  | Description            |
+| ----------- | ---------------------- |
+| Python 3.11 | Programming Language   |
+| YOLOv11     | Object Detection Model |
+| FastAPI     | REST API Framework     |
+| Uvicorn     | ASGI Server            |
+| OpenCV      | Image Processing       |
+| Pillow      | Image Handling         |
+| NumPy       | Numerical Computing    |
+| Docker      | Containerization       |
+| Render      | Cloud Deployment       |
 
 ---
 
@@ -89,7 +89,7 @@ Bangladeshi-Taka-Note-Detection/
 ## Clone Repository
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_LINK
+git clone [https://github.com/didipta/Bangladeshi-Taka-Note-Detection.git](https://github.com/didipta/Bangladeshi-Taka-Note-Detection.git)
 
 cd Bangladeshi-Taka-Note-Detection
 ```
@@ -159,8 +159,8 @@ http://127.0.0.1:8000/redoc
 ## Home
 
 | Method | Endpoint |
-|---------|----------|
-| GET | / |
+| ------ | -------- |
+| GET    | /        |
 
 Returns the web interface.
 
@@ -169,8 +169,8 @@ Returns the web interface.
 ## Health Check
 
 | Method | Endpoint |
-|---------|----------|
-| GET | /health |
+| ------ | -------- |
+| GET    | /health  |
 
 Example Response
 
@@ -186,8 +186,8 @@ Example Response
 ## Predict Currency Notes
 
 | Method | Endpoint |
-|---------|----------|
-| POST | /predict |
+| ------ | -------- |
+| POST   | /predict |
 
 ### Request
 
@@ -199,9 +199,9 @@ multipart/form-data
 
 Parameter
 
-| Name | Type | Required |
-|------|------|----------|
-| file | Image (.jpg/.jpeg/.png) | Yes |
+| Name | Type                    | Required |
+| ---- | ----------------------- | -------- |
+| file | Image (.jpg/.jpeg/.png) | Yes      |
 
 ---
 
@@ -229,11 +229,11 @@ http://127.0.0.1:8000/predict
   "inference_time_ms": 37.82,
   "detections": [
     {
-      "class_name": "100_taka",
+      "class_name": "100f",
       "confidence": 0.9876,
       "bbox": {
         "x1": 96.52,
-        "y1": 58.20,
+        "y1": 58.2,
         "x2": 520.43,
         "y2": 310.88
       }
@@ -373,6 +373,7 @@ Include the following screenshots in the Google Docs report.
 - ✅ Documentation
 - ✅ Cloud Deployment
 - ✅ Public API
+- ✅ Public URL
 
 ---
 
