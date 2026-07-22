@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
 from app.schemas import HealthResponse, PredictionResponse
+from app.utils import allowed_file
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("taka-detector")
@@ -94,11 +95,11 @@ async def predict(file: UploadFile = File(...)):
             detail="No file selected."
         )
 
-    if file.content_type not in ALLOWED_CONTENT_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail="Only JPG and PNG images are supported."
-        )
+    if not allowed_file(file.content_type, ALLOWED_CONTENT_TYPES):
+      raise HTTPException(
+        status_code=400,
+        detail="Only JPG and PNG images are supported."
+     )
 
     image_bytes = await file.read()
 
