@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) != 2:
         print("Usage:")
-        print("python predictor.py image.jpg")
+        print("app/predict.py sample_image/test (1).jpg")
         sys.exit(1)
 
     image_path = sys.argv[1]
